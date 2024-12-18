@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myapp
+spec:
+  replicas: 2
+  serviceName: app
+
+  volumeClaimTemplates:
+  - metadata:
+      name: mydata
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
+
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: app
+        image: alpine:3
+        tty: true
+        volumeMounts:
+        - name: mydata
+          mountPath: /data

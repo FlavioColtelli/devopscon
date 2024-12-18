@@ -1,0 +1,22 @@
+Update the php-app to contain new output (f.e. “v2”)
+
+Build a new image (avoid ":latest" as usual for consistency and traceability).
+
+$ export IMAGE_NAME=$(uuidgen)
+$ docker build -t ttl.sh/${IMAGE_NAME}:24h .
+$ docker push ttl.sh/${IMAGE_NAME}:24h
+
+Update the deployment with the new image or substitute the placeholder with the new image name.
+
+$ cat deployment.yaml | envsubst '${IMAGE_NAME}' | kubectl apply -f -
+
+Observe the rollout and access the app during the rollout
+
+$ kubectl get pods -w
+
+Access the application during the update with a browser or curl.
+Note that you will see output from old and new version in unpredictable order.
+
+Force a rollout without changes.
+
+$ kubectl rollout restart deployment php-app

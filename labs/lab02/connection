@@ -1,0 +1,36 @@
+When using the workshop cluster:
+- reserve your slot
+- access VSCode, password is shown on org-page
+- open terminal in VSCode (button on upper left side)
+- inspect your $HOME/.kube/config
+
+
+When using cloud cluster:
+- use cloud shell with kubectl
+- ...or download kubeconfig and place in $HOME/.kube/config
+- inspect your $HOME/.kube/config
+
+
+When using minikube or docker desktop:
+- kubectl should be automatically configured
+- inspect your $HOME/.kube/config
+
+
+Execute commands
+
+$ kubectl get nodes
+
+$ kubectl config view
+
+
+Remote access of workshop cluster (optional):
+
+- Download kubeconfig from the org-app
+
+
+Usage: 
+
+- place file in $HOME/.kube/config or point environment variable KUBECONFIG to file
+
+$ KUBECONFIG=./sample.yaml kubectl get nodes
+

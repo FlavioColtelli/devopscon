@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app-blue
+  labels:
+    run: demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: demo
+      stage: blue
+  template:
+      metadata:
+        labels:
+          run: demo
+          stage: blue
+      spec:
+        containers:
+        - image: ttl.sh/${BLUE_IMAGE_NAME}:24h
+          name: app
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi

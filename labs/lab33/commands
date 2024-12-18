@@ -1,0 +1,78 @@
+Use a Blue-Green-Deployment to switch quickly between two versions with at least 3 replicas and at most 5 replicas
+
+Delete the existing deployments of the php app.
+
+$ kubectl delete deployment php-app
+
+
+Update the Service to only select Pods from stage "blue".
+
+kind: Service
+spec:
+  selector:
+    run: demo
+    stage: blue
+
+
+Create a new version of the PHP image, make sure the version is visible from the output (f.e. “blue”)
+
+$ export BLUE_IMAGE_NAME=$(uuidgen)
+$ docker build -t ttl.sh/${BLUE_IMAGE_NAME}:24h .
+$ docker push ttl.sh/${BLUE_IMAGE_NAME}:24h
+
+
+Update the Deployment to include an additional label to discriminate the blue/green stage and reference the new image (or substitute it later).
+
+kind: Deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: demo
+      stage: blue
+  template:
+      metadata:
+        labels:
+          run: demo
+          stage: blue
+
+Apply the Deployment.
+
+$ cat blue-deployment.yaml | envsubst '${BLUE_IMAGE_NAME}' | kubectl apply -f -
+
+Access the service to validat everything works.
+
+Create a new version of the PHP image, make sure the version is visible from the output (f.e. "green")
+
+$ export GREEN_IMAGE_NAME=$(uuidgen)
+$ docker build -t ttl.sh/${GREEN_IMAGE_NAME}:24h .
+$ docker push ttl.sh/${GREEN_IMAGE_NAME}:24h
+
+Create a second Deployment including the green stage label and referencing the new green image (or substitute it later).
+
+kind: Deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: demo
+      stage: green
+  template:
+      metadata:
+        labels:
+          run: demo
+          stage: green
+
+$ cat green-deployment.yaml | envsubst '${GREEN_IMAGE_NAME}' | kubectl apply -f -
+
+Switch from blue to green by updating the Service label-selector.
+
+$ kubectl patch service php-app -p '{"spec": {"selector": {"run": "demo", "stage": "green"}}}'
+
+Switch back.
+You can access the service from a second terminal while switching.
+
+$ while true; do curl -s https://php-app-student01.t9v.de | grep Welcome; done;
+$ kubectl patch service php-app -p '{"spec": {"selector": {"run": "demo", "stage": "blue"}}}'
+
+Delete the unused deployment.

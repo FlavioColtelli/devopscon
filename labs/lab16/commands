@@ -1,0 +1,35 @@
+Determine unique name for container image as to avoid conflices on public ttl.sh registry.
+You can use “<conference>/<student-name>/<app>”, for example: “ttl.sh/devopscon/trainer/phpapp”
+or a UUID (lowercase), for example: “ttl.sh/46f80072-4c7a-41ec-a016-8f1502d65d69”
+
+Linux
+$ IMAGE_NAME=$(uuidgen)
+
+macOS
+$ IMAGE_NAME=$(uuidgen | tr "[:upper:]" "[:lower:]")
+
+
+Build the container image with Docker and push it to ttl.sh registry with unique image name
+and optionally a time to live as docker tag (unique feature of ttl.sh).
+
+$ docker build -t ttl.sh/${IMAGE_NAME}:24h .
+$ docker push ttl.sh/${IMAGE_NAME}:24h
+
+
+Run a Pod with the pushed image
+
+$ kubectl run php-app --image ttl.sh/${IMAGE_NAME}:24h --port 80
+
+or adjust the "pod.yaml" in this folder by using the chosen image name to define the Pod.
+
+Linux example for automatic replacement of placeholder:
+
+$ export IMAGE_NAME
+$ cat pod.yaml | envsubst '${IMAGE_NAME}' | kubectl apply -f -
+
+
+Access HTTP port of the Pod by IP
+
+$ kubectl get pods -o wide
+$ kubectl run shell --rm -it --image trion/curl:1
+$ curl http://<POD-IP>

@@ -1,0 +1,35 @@
+Query existing storageclasses
+
+$ kubectl get storageclasses
+
+Create a StorageClass "manual"
+
+$ kubectl apply -f storageclass.yaml
+
+Check status (or use --watch in parallel with creation).
+When using the workshop cluster this might get cleaned up immediately.
+This can be ignored.
+
+$ kubectl get sc 
+
+Create a PersistentVolumeClaim with storageClassName "manual", a Pod that references the PVC.
+
+$ kubectl apply -f pvc.yaml
+$ kubectl apply -f pod.yaml
+
+Check status
+
+$ kubectl get pv,pvc,pod
+
+Create two PersistentVolue objects, one with the storageClassName "manual", one with empty string.
+
+$ kubectl apply -f pv.yaml
+
+Check status
+
+$ kubectl get pv,pvc,pod
+
+
+Cleanup after the lab:
+
+$ kubectl delete storageclass/manual pod/app2 pvc/pvc2 pv/other pv/chosen

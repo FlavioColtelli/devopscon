@@ -1,0 +1,35 @@
+The following registries can be used without authentication
+
+ttl.sh - automatic image deletion by tag (f.e. :4h -> 4 hours, default 24 hours)
+
+registry.t9v.de - will be deleted after the workshop
+
+
+The following images are used:
+
+hello-world
+CLI to validate correct docker setup, print some text.
+
+trion/curl:1  
+Used as interactive container ( -it ) to provide cURL, httpie
+
+ghcr.io/trion-development/echoserver:1
+Sample web application, port 3000
+
+ghcr.io/trion-development/kubectl:1
+Provides kubectl as cli container
+
+nginx:stable
+Static webserver, port 80, document path /usr/share/nginx/html
+
+php:8-apache
+Base image for our PHP application, port 80, document path /var/www/html
+
+php-app
+Our PHP based demo application, port 80
+
+busybox:stable
+Minimalistic shell, 2mb size, run interactively ( -it )
+
+alpine:3
+Minimalistic linux distribution, 8mb size, run interactively ( -it )

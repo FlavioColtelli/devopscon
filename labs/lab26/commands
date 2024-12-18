@@ -1,0 +1,60 @@
+Create a Pod definition with two containers.
+The first container should run the command: echo Container running > /data/out
+Ensure that the Pod terminates successfully and is not restarted.
+
+$ kubectl run demo --image  trion/curl:1  --dry-run=client -o yaml > pod.yaml \
+  --restart=OnFailure --command -- sh -c 'echo Container running > /data/out' 
+
+Define an emptyDir volume for the Pod.
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+spec:
+  volumes:
+  - name: data
+    emptyDir: {}
+
+
+Mount the volume in the container
+
+kind: Pod
+spec:
+  containers:
+  - name: producer
+    volumeMounts:
+    - name: data
+      mountPath: /data
+
+
+Add a second container that prints the content of the file to stdout.
+
+kind: Pod
+spec:
+  containers:
+  - name: consumer
+    command:
+    - sh
+    - -c
+    - cat /input/out
+    image: trion/curl:1
+    resources: {}
+
+Run the Pod and observe status and output.
+
+$ kubectl apply -f pod.yaml
+
+$ kubectl get pods
+
+$ kubectl logs demo -c consumer
+
+Depending on your cluster the output might not be shown:
+The second container might run before the first.
+
+Add a "sleep 2;" to the command of the consumer container to ensure the file is ready.
+
+
+Delete the pod.
+
+$ kubectl delete pod demo

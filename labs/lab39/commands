@@ -1,0 +1,44 @@
+Create a StatefulSet with the alpine:3 image.
+Use a volumeClaimTemplate.
+
+kind: StatefulSet
+spec:
+  volumeClaimTemplates:
+  - metadata:
+      name: mydata
+...
+  template:
+    spec:
+      containers:
+      - name: app
+        image: alpine:3
+        tty: true
+        volumeMounts:
+        - name: mydata
+          mountPath: /data
+... 
+
+$ kubectl apply -f statefulset.yaml
+
+Check status
+
+$ kubectl get pods,pvc,pv
+
+Access the volume in each instance
+Is the storage shared?
+
+$ kubectl exec myapp-0 --  sh -c "mkdir /data/zero; touch /data/zero/stamp; ls -l /data/zero"
+$ kubectl exec myapp-1 --  sh -c "mkdir /data/one; touch /data/one/stamp; ls -l /data/one"
+$ kubectl exec myapp-0 --  sh -c "ls -Rl /data"
+$ kubectl exec myapp-1 --  sh -c "ls -Rl /data"
+
+
+Cleanup after the lab:
+
+$ kubectl delete statefulset/myapp
+$ kubectl delete pvc --all
+
+
+Check status
+
+$ kubectl get statefulsets,pods,pvc,pv

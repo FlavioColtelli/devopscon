@@ -1,0 +1,43 @@
+When using minikube: Install storage-provisioner addon
+$ minikube addons enable storage-provisioner
+
+
+Check available storageclasses.
+
+$ kubectl get storageclasses
+
+Create a Pod that uses a PersistentVolumeClaim with the default StorageClass:
+Either leave out the storageClassName or specify the name of the default class.
+
+$ kubectl apply -f pvc.yaml
+$ kubectl apply -f pod.yaml
+
+Check status
+
+$ kubectl get pv,pvc,pod
+
+Can you create a second running Pod using the same PVC?
+
+$ kubectl apply -f second-pod.yaml
+$ kubectl get pv,pvc,pod
+$ kubectl describe pod second
+
+Write data, delete the Pods and create a new one that uses the same Claim
+
+$ kubectl exec demo -- sh -c "mkdir /data/bar; touch /data/bar/stamp; ls -l /data/bar"
+$ kubectl delete pods --all
+
+$ kubectl apply -f pod.yaml
+
+Is the data still available?
+
+$ kubectl exec demo -- ls -l /data/bar
+
+
+Cleanup after the lab:
+
+$ kubectl delete pods,pvc --all
+
+Check status, note that the PV gets removed
+
+$ kubectl get pv,pvc,pod

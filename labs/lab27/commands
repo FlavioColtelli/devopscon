@@ -1,0 +1,22 @@
+Use the Pod from lab26
+
+Use an initContainer to guarantee execution order.
+
+kind: Pod
+spec:
+  initContainers:
+  - name: producer
+    ...
+
+Run the Pod and monitor the state, notice that the initContainer do not count toward the container count.
+
+$ kubectl apply -f pod.yaml
+$ kubectl get pods
+
+Get the output.
+
+$ kubectl logs demo
+
+Delete the pod.
+
+$ kubectl delete pod demo

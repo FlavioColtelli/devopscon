@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sec-demo
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: consumer
+    command:
+    - sh
+    - -c
+    - env; ls -l /secret; sleep 1h 
+    image: trion/curl:1
+    resources: {}
+    volumeMounts:
+    - name: data
+      mountPath: /secret
+
+    env:
+    - name: FOO
+      valueFrom:
+        secretKeyRef:
+          name: sec
+          key: foo
+
+  volumes:
+  - name: data
+    secret:
+      secretName: sec

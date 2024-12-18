@@ -1,0 +1,37 @@
+Update the php-app to contain new output (f.e. “canary”)
+
+Build a new image (avoid ":latest" as usual for consistency and traceability).
+
+$ export IMAGE_NAME=$(uuidgen)
+$ docker build -t ttl.sh/${IMAGE_NAME}:24h .
+$ docker push ttl.sh/${IMAGE_NAME}:24h
+
+Scale the old deployment to 4 replicas
+
+$ kubectl scale deployment php-app --replicas 4
+
+Create a canary Deployment by creating a second Deployment with a different name, f.e. "php-app-canary".
+20% of all requests should be served by the canary version:
+To reach that target the replicas of the new Deployment must be set to 1.
+
+$ cat canary.yaml | envsubst '${IMAGE_NAME}' | kubectl apply -f -
+
+Validate that the right amount of Pods are present.
+
+$ kubectl get pods --show-labels
+
+Check the distribution, for example
+
+$ bash -c 'for i in {1..100}; do curl -s https://php-app-student01.t9v.de; done | grep -o ": canary\|: v2" | sort | uniq -c'
+
+
+Increase the amount to 80% in multiple steps
+
+$ kubectl scale deployment php-app-canary --replicas 2
+$ kubectl scale deployment php-app --replicas 3
+$ kubectl scale deployment php-app --replicas 2
+$ kubectl scale deployment php-app-canary --replicas 4
+
+Remove the canary deployment.
+
+$ kubectl delete deployment php-app-canary

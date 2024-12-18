@@ -1,0 +1,20 @@
+A short reminder how to provide an image: (lab22)
+
+$ export IMAGE_NAME=$(uuidgen)
+$ docker build -t ttl.sh/${IMAGE_NAME}:24h .
+$ docker push ttl.sh/${IMAGE_NAME}:24h
+
+Switch to the right Namespace in case you changed it in between.
+
+$ kubectl config set-context --current --namespace=workshop
+
+Use your ReplicaSet for the PHP application from lab25 as base for the Deployment to be created in this lab.
+
+Change the kind to Deployment.
+Make sure to adjust the image name in the YAML or substitute the placeholder when applying.
+
+$ cat deployment.yaml | envsubst '${IMAGE_NAME}' | kubectl apply -f -
+
+Get the status of all relevant components. (Ingress and Service are from lab23)
+
+$ kubectl get all,ingresses

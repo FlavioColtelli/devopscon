@@ -1,0 +1,48 @@
+Create a secret from a literal value or YAML with stringData input.
+
+$ kubectl create secret generic sc --from-literal input=secret --dry-run=client -o yaml > sec.yaml
+
+Create the secret
+
+$ kubectl apply -f sec.yaml
+
+Retrieve the YAML representation, observe that the values are Base64 encoded.
+
+$ kubectl get secret sec -o yaml
+
+Define a Pod that uses the Secret in an environment variable and volume mount.
+You can adjust the Pod from lab28.
+
+kind: Pod
+spec:
+  containers:
+  - name: consumer
+    env:
+    - name: FOO
+      valueFrom:
+        secretKeyRef:
+          name: sec
+          key: foo
+
+  volumes:
+  - name: data
+    secret:
+      secretName: sec
+
+Create the Pod.
+
+$ kubectl apply -f pod.yaml
+
+
+Inspect the secret content mapping inside the Pod.
+
+$ kubectl exec -it sec-demo -- /bin/sh
+~ env
+~ cd /secret
+~ ls -l
+~ cat input
+~ exit
+
+Delete the Pod.
+
+$ kubectl delete pod sec-demo

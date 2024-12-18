@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myapp
+spec:
+  replicas: 2
+  serviceName: app
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: ghcr.io/trion-development/echoserver:1
+        ports:
+        - containerPort: 80
+          name: http

@@ -1,0 +1,64 @@
+Create a PersistentVolume implemented using "local", use "/tmp" as path.
+
+$ kubectl apply -f persistentvolume.yaml
+
+Check the status.
+
+$ kubectl get pv
+
+Create a PersistentVolumeClaim that requests 1Gi capacity.
+Set the storageClassName as empty string ("") value.
+
+$ kubectl apply -f persistentvolumeclaim.yaml
+
+Check the status.
+
+$ kubectl get pv,pvc
+
+Use the PersistentVolumeClaim in a Pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app2
+spec:
+  containers:
+  - name: app
+    image: alpine:3
+    tty: true
+    resources: {}
+    volumeMounts:
+    - name: data
+      mountPath: /data
+  volumes:
+  - name: data
+    persistentVolumeClaim:
+      claimName: lpvc
+
+
+$ kubectl apply -f pod.yaml
+
+Check the status, note the node of the pod.
+
+$ kubectl get pv,pvc,pod -o wide
+
+Use the volume in the pod.
+
+$ kubectl exec app2 -- sh -c "mkdir /data/bar; touch /data/bar/stamp; ls -l /data/bar"
+
+Delete the pod, recreate it and check the data volume content;
+
+$ kubectl delete -f pod.yaml
+$ kubectl apply -f pod.yaml
+
+Check the status, check if node of the pod changed.
+
+$ kubectl get pv,pvc,pod -o wide
+
+Is the data still there? (only if node not changed!)
+
+$ kubectl exec app2 -- ls -l /data/bar
+
+Delete the objects to avoid confusion in later labs.
+
+$ kubectl delete -f .

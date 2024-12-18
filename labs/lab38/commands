@@ -1,0 +1,43 @@
+Create a headless Service
+
+kind: Service
+spec:
+  clusterIP: None
+
+$ kubectl apply -f service.yaml
+
+Create a StatefulSet with the ghcr.io/trion-development/echoserver:1 image, reference the service
+
+kind: StatefulSet
+spec:
+  serviceName: app
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+
+$ kubectl apply -f statefulset.yaml
+
+Check status, note that service does not have an ip and endpoints are not shown when describing the service
+
+$ kubectl get pods,svc,ep
+$ kubectl describe service app
+
+Access each instance from an interactive Pod with trion/curl:1 image 
+Check the DNS response for the service
+
+$ kubectl run shell --rm -it --image trion/curl:1
+~ curl http://myapp-0.app:3000
+~ curl http://myapp-1.app:3000
+~ nslookup app
+~ nslookup app
+~ exit 
+
+Cleanup after the lab:
+
+$ kubectl delete svc/app statefulset/myapp

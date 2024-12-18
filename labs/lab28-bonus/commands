@@ -1,0 +1,54 @@
+Adjust the PHP sample app to show the data from the ConfigMap.
+
+<p>Environment: <?= getenv('APP_ENV') ?> </p>
+<p>File: ("/config/config.ini") <?= @file_get_contents("/config/config.ini") ?> </p>
+
+
+Remember to build a new container image to reflect the change:
+
+Linux
+$ IMAGE_NAME=$(uuidgen)
+
+macOS
+$ IMAGE_NAME=$(uuidgen | tr "[:upper:]" "[:lower:]")
+
+$ docker build -t ttl.sh/${IMAGE_NAME}:24h .
+$ docker push ttl.sh/${IMAGE_NAME}:24h
+
+
+Adjust the Pod (or PodTemplate in your ReplicaSet) to reference the ConfigMap
+as required by the application and the new image name/tag:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: php-app
+spec:
+  containers:
+  - name: app
+    image: ttl.sh/${IMAGE_NAME}:24h
+...
+    volumeMounts:
+    - name: data
+      mountPath: /config
+...
+    env:
+    - name: APP_ENV
+      valueFrom:
+        configMapKeyRef:
+          name: cfg
+          key: foo
+...
+  volumes:
+  - name: data
+    configMap:
+      name: cfg
+
+
+$ export IMAGE_NAME=${IMAGE_NAME}
+$ cat replicaset.yaml | envsubst '${IMAGE_NAME}' | kubectl apply -f -
+
+
+Delete existing Pods, let ReplicaSet handle creation or create the Pod manually.
+
+$ kubectl delete pods --all

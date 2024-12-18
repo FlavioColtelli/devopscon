@@ -1,0 +1,53 @@
+Define a ConfigMap using the content of the file "config.ini" and a literal value foo=bar without creating it in the cluster.
+
+$ kubectl create configmap cfg --from-file config.ini --from-literal foo=bar --dry-run=client -o yaml > cmap.yaml
+
+Reference the ConfigMap inside a Pod, with the "foo" value as environment variable and the whole ConfigMap as a volume.
+
+kind: Pod
+spec:
+  containers:
+  - name: consumer
+    volumeMounts:
+    - name: data
+      mountPath: /config
+
+    env:
+    - name: FOO
+      valueFrom:
+        configMapKeyRef:
+          key: foo
+          name: cfg
+
+  volumes:
+  - name: data
+    configMap:
+      name: cfg
+
+
+Run the Pod.
+
+$ kubectl apply -f pod.yaml
+
+Check the pod status, observe that it is stuck in ContainerCreating as long as the ConfigMap is missing.
+Notice that this can be diagnosed using describe on the Pod (State: Waiting, Events)
+
+$ kubectl describe pod cm-emo
+
+Create the configmap.
+
+$ kubectl apply -f cmap.yaml
+
+Inspect the mapping inside the Pod.
+
+$ kubectl exec -it cm-demo -- /bin/sh
+~ env
+~ cd /config
+~ ls -l
+~ cat config.ini
+~ exit
+
+
+Delete the Pod.
+
+$ kubectl delete pod cm-demo

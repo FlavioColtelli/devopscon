@@ -1,0 +1,24 @@
+When using minikube
+- Open a separate terminal
+- Execute `minikube dashboard`
+- Keep terminal open (required for proxy)
+
+When using the workshop cluster:
+- Execute `kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml`
+- Create an admin user `kubectl -n kubernetes-dashboard create serviceaccount admin-user`
+- Grant all rights to user `kubectl create clusterrolebinding admin-user --clusterrole cluster-admin --serviceaccount kubernetes-dashboard:admin-user`
+- Obtain login token: `kubectl -n kubernetes-dashboard create token admin-user`
+- Execute `kubectl proxy --accept-hosts='.*'` (and keep it running)
+- Access the dashboard via (replace student name) https://code-studentXX.t9v.de/proxy/8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+- Use the login token printed ealier to access the dashboard
+- Please stop the `kubectl proxy` when done as this configuration is unsafe and can be accessed by anybody
+- Please remove the dashboard once you are finished using it to conserve resources: `kubectl delete namespace kubernetes-dashboard`
+
+
+When using docker desktop:
+- Execute `kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml`
+- Create an admin user `kubectl -n kubernetes-dashboard create serviceaccount admin-user`
+- Grant all rights to user `kubectl create clusterrolebinding admin-user --clusterrole cluster-admin --serviceaccount kubernetes-dashboard:admin-user`
+- Obtain login token: `kubectl -n kubernetes-dashboard create token admin-user`
+- Execute `kubectl proxy` (and keep it running)
+- Access the dashboard via http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/

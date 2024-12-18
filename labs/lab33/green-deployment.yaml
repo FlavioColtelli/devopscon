@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app-green
+  labels:
+    run: demo
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: demo
+      stage: green
+  template:
+      metadata:
+        labels:
+          run: demo
+          stage: green
+      spec:
+        containers:
+        - image: ttl.sh/${GREEN_IMAGE_NAME}:24h
+          name: app
+          ports:
+          - containerPort: 80
+            protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi

@@ -1,0 +1,79 @@
+Create a Deployment with 3 replicas
+
+$ kubectl create deployment demo --image ghcr.io/trion-development/echoserver:1 --replicas 3 
+
+Create a PodDisruptionBudget with 2 minAvailable Pods
+
+$ kubectl create pdb demo --min-available=2 --selector=app=demo
+
+$ kubectl describe pdb demo
+
+
+Observe behaviour for the following situations:
+Scale down
+
+$ kubectl scale deployment demo --replicas 2
+$ kubectl get pods
+$ kubectl describe pdb demo
+
+
+Trigger an eviction using the API server.
+Determine the name of a pod to evict:
+
+$ kubectl get pods
+
+Create an eviction using httpie or curl.
+Make API server accessible but keeping a proxy running in separate terminal instance:
+
+$ kubectl proxy 
+
+Create the eviction.
+Adjust the Pod name from the example 'demo-59b58cd48f-72jqb'
+
+$ http :8001/api/v1/namespaces/default/pods/demo-59b58cd48f-72jqb/eviction \
+apiVersion=policy/v1 kind=Eviction metadata:='{"name": "demo-59b58cd48f-72jqb", "namespace": "default"}'
+
+or
+
+$ curl -v -H 'Content-type: application/json' http://localhost:8001/api/v1/namespaces/default/pods/demo-59b58cd48f-72jqb/eviction -d '{"apiVersion":"policy/v1","kind":"Eviction","metadata":{"name":"demo-59b58cd48f-72jqb","namespace":"default"}}'
+
+
+Bonus:
+Drain node while violating PDB.
+This can not be performed directly on the workshop cluster.
+You can use kind or minikube on you local machine for this.
+
+For minikube start a multi node cluster using:
+
+$ minikube start --driver docker --nodes 4 --profile multi
+
+
+$ kubectl scale deployment demo --replicas 3
+$ kubectl delete pdb demo
+$ kubectl create pdb demo --min-available=3 --selector=app=demo
+$ kubectl get nodes
+$ kubectl get pods -o wide 
+
+Attempt to drain a node where a pod is scheduled
+
+$ kubectl drain multi-m02 --ignore-daemonsets
+
+
+Remove constraint
+
+$ kubectl scale deployment demo --replicas 4
+
+
+or delete that blocks draining manually
+
+$ kubectl delete pod demo-59b58cd48f-fvdjk
+
+Observe the node is now drained.
+Restore the node for scheduling for further experiments:
+
+$ kubectl uncordon multi-m02
+
+
+If you are using minikube you can remove the cluster using the following command:
+
+$ minikube delete -p multi
